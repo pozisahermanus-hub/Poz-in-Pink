@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poz in Pink</title>
+    <style>
+        /* Global styles */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #fff5f6;
+            color: #000;
+        }
+        header {
+            background-color: #F9C6C9; /* blush pink */
+            padding: 20px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            background-color: #fff;
+            padding: 10px 0;
+        }
+        nav a {
+            text-decoration: none;
+            color: #000;
+            font-weight: bold;
+        }
+        .hero {
+            text-align: center;
+            padding: 50px 20px;
+            background: url('https://images.unsplash.com/photo-1587825140708-9f78e0247fc5?fit=crop&w=1200&q=80') center/cover no-repeat;
+            color: white;
+            font-size: 2em;
+        }
+        .categories {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        .category-card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            width: 200px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 0 20px 40px 20px;
+        }
+        .product-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .product-card img {
+            width: 100%;
+            border-radius: 12px;
+        }
+        .product-card h3 {
+            margin: 10px 0 5px 0;
+        }
+        .product-card p {
+            margin: 5px 0;
+        }
+        .product-card button {
+            background-color: #F9C6C9;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .cart {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #F9C6C9;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .close-btn {
+            cursor: pointer;
+            float: right;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <header>Poz in Pink</header>
+    <nav>
+        <a href="#rollons">Roll-ons</a>
+        <a href="#bodyspray">Body Spray</a>
+        <a href="#hair">Hair</a>
+        <a href="#makeup">Makeup</a>
+    </nav>
+    <div class="hero">
+        Beauty & Personal Care Delivered To You 💖
+    </div>
+
+    <div class="categories">
+        <div class="category-card" onclick="filterCategory('Roll-ons')">Roll-ons</div>
+        <div class="category-card" onclick="filterCategory('Body Spray')">Body Spray</div>
+        <div class="category-card" onclick="filterCategory('Hair')">Hair</div>
+        <div class="category-card" onclick="filterCategory('Makeup')">Makeup</div>
+    </div>
+
+    <div class="products" id="product-list">
+        <!-- Products will be injected here -->
+    </div>
+
+    <div class="cart" onclick="alert('Cart is currently empty!')">🛒 Cart</div>
+
+    <!-- Product Modal -->
+    <div class="modal" id="product-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h3 id="modal-title"></h3>
+            <img id="modal-img" src="" alt="" style="width:80%; border-radius:12px;">
+            <p id="modal-price"></p>
+            <p id="modal-desc"></p>
+            <button onclick="addToCart()">Add to Cart</button>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            {name: 'Mitchum Roll-on', category: 'Roll-ons', price: 'R50', img:'https://images.unsplash.com/photo-1616627983456-c77dff7b8b2f', desc:'Keeps you fresh all day.'},
+            {name: 'Revlon Body Spray', category: 'Body Spray', price: 'R120', img:'https://images.unsplash.com/photo-1592928303866-5b56edb05e56', desc:'Long-lasting fragrance.'},
+            {name: 'Hair Serum', category: 'Hair', price: 'R200', img:'https://images.unsplash.com/photo-1600185366004-621da4a86536', desc:'Smooth and shiny hair.'},
+            {name: 'Lipstick', category: 'Makeup', price: 'R150', img:'https://images.unsplash.com/photo-1612182063201-042d1d3f7426', desc:'Vibrant long-lasting color.'},
+        ];
+
+        const productList = document.getElementById('product-list');
+        const modal = document.getElementById('product-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalImg = document.getElementById('modal-img');
+        const modalPrice = document.getElementById('modal-price');
+        const modalDesc = document.getElementById('modal-desc');
+
+        function showProducts(list) {
+            productList.innerHTML = '';
+            list.forEach((p,i) => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <img src="${p.img}" alt="${p.name}">
+                    <h3>${p.name}</h3>
+                    <p>${p.price}</p>
+                    <button onclick="openModal(${i})">View</button>
+                `;
+                productList.appendChild(card);
+            });
+        }
+
+        function filterCategory(cat) {
+            const filtered = products.filter(p => p.category === cat);
+            showProducts(filtered);
+        }
+
+        function openModal(index) {
+            const p = products[index];
+            modalTitle.innerText = p.name;
+            modalImg.src = p.img;
+            modalPrice.innerText = p.price;
+            modalDesc.innerText = p.desc;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        function addToCart() {
+            alert('Added to cart!');
+            closeModal();
+        }
+
+        // Show all products by default
+        showProducts(products);
+    </script>
+</body>
+</html>
